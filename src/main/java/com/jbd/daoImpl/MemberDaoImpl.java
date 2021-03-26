@@ -2,6 +2,7 @@ package com.jbd.daoImpl;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,14 +33,14 @@ public class MemberDaoImpl implements MemberDao {
 
 		List<Member> memberList = new ArrayList<>();
 
-		CallableStatement cb = null;
+		PreparedStatement ps = null;
 
 		try (Connection connection = dataSource.getConnection()) {
 
-			cb = connection.prepareCall(JbdConstants.StoredProcedure.GET_MEMBER_LIST);
+			ps = connection.prepareStatement(JbdConstants.StoredProcedure.GET_ALL_MEMBERS);
 
-			logger.info("Executing stored procedure : " + JbdConstants.StoredProcedure.GET_MEMBER_LIST);
-			ResultSet rs = cb.executeQuery();
+			logger.info("Executing query : " + JbdConstants.StoredProcedure.GET_ALL_MEMBERS);
+			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
 
@@ -50,14 +51,13 @@ public class MemberDaoImpl implements MemberDao {
 			}
 
 		} catch (Exception e) {
-			logger.error(
-					"Exception occured while executing Store Procedure" + JbdConstants.StoredProcedure.GET_MEMBER_LIST);
+			logger.error("Exception occured while executing query : " + JbdConstants.StoredProcedure.GET_ALL_MEMBERS);
 			e.printStackTrace();
 			throw new JbdException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {
 			try {
-				if (cb != null) {
-					cb.close();
+				if (ps != null) {
+					ps.close();
 				}
 			} catch (Exception e2) {
 				logger.error(e2.getMessage());
